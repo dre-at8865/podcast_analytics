@@ -1,0 +1,106 @@
+version: 2
+
+models:
+  - name: stg_events
+    description: Cleaned and validated event logs
+    columns:
+      - name: user_id
+        description: User identifier
+        tests:
+          - not_null
+      - name: episode_id
+        description: Episode identifier
+        tests:
+          - not_null
+      - name: event_timestamp
+        description: When the event occurred
+        tests:
+          - not_null
+      - name: event_type
+        description: Type of event
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['play', 'pause', 'seek', 'complete']
+      - name: duration_seconds
+        description: Duration for play/complete events
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "duration_seconds > 0 OR duration_seconds IS NULL"
+
+  - name: stg_users
+    description: Clean user data
+    columns:
+      - name: user_id
+        description: Unique user identifier
+        tests:
+          - unique
+          - not_null
+      - name: country
+        description: User country
+        tests:
+          - not_null
+
+  - name: stg_episodes
+    description: Clean episode data
+    columns:
+      - name: episode_id
+        description: Unique episode identifier
+        tests:
+          - unique
+          - not_null
+      - name: duration_seconds
+        description: Episode duration
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "duration_seconds > 0"
+
+  - name: fact_listening_sessions
+    description: Fact table of user listening sessions
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "listen_through_rate >= 0 AND listen_through_rate <= 2"
+          config:
+            severity: warn
+    columns:
+      - name: session_key
+        description: Unique session identifier
+        tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: User identifier
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_users')
+              field: user_id
+      - name: episode_id
+        description: Episode identifier
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_episodes')
+              field: episode_id
+
+  - name: fact_daily_user_activity
+    description: Daily user activity aggregations
+    columns:
+      - name: daily_activity_key
+        description: Unique daily activity identifier
+        tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: User identifier
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_users')
+              field: user_id
+      - name: episodes_listened
+        description: Number of episodes listened to
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "episodes_listened >= 0"

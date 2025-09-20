@@ -1,0 +1,56 @@
+version: 2
+
+sources:
+  - name: raw_podcast_data
+    description: Raw CSV files containing podcast streaming data
+    tables:
+      - name: event_logs
+        description: User interaction events with podcast episodes
+        columns:
+          - name: event_type
+            description: Type of event (play, pause, seek, complete)
+          - name: user_id
+            description: Unique identifier for the user
+          - name: episode_id
+            description: Unique identifier for the episode
+          - name: timestamp
+            description: When the event occurred
+          - name: duration
+            description: Duration in seconds (only for play and complete events)
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns:
+                - user_id
+                - episode_id
+                - timestamp
+                - event_type
+
+      - name: users
+        description: User demographics and signup information
+        columns:
+          - name: user_id
+            description: Unique identifier for the user
+            tests:
+              - unique
+              - not_null
+          - name: signup_date
+            description: Date when user signed up
+          - name: country
+            description: User's country
+
+      - name: episodes
+        description: Episode metadata and information
+        columns:
+          - name: episode_id
+            description: Unique identifier for the episode
+            tests:
+              - unique
+              - not_null
+          - name: podcast_id
+            description: Identifier for the podcast this episode belongs to
+          - name: title
+            description: Episode title
+          - name: release_date
+            description: When the episode was released
+          - name: duration_seconds
+            description: Total duration of the episode in seconds

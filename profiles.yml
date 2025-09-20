@@ -1,0 +1,7 @@
+podcast_analytics:
+  outputs:
+    dev:
+      type: duckdb
+      path: 'podcast_analytics.duckdb'
+      schema: main
+  target: dev
