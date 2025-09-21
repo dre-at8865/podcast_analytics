@@ -44,50 +44,7 @@ Sources → Staging → Intermediate → Marts
 
 **3-Layer Architecture with Proper Dependencies:**
 
-```
-STAGING LAYER (Views)
-┌─────────────┐  ┌──────────────┐  ┌─────────────────┐
-│ stg_events  │  │ stg_users    │  │ stg_episodes    │
-│             │  │              │  │                 │
-│ event_type  │  │ user_id (PK) │  │ episode_id (PK) │
-│ user_id     │  │ signup_date  │  │ podcast_id      │
-│ episode_id  │  │ country      │  │ title           │
-│ timestamp   │  │              │  │ duration_secs   │
-└─────────────┘  └──────────────┘  └─────────────────┘
-       │               │                      │
-       └───────────────┼──────────────────────┘
-                       │
-INTERMEDIATE LAYER (Views)
-                ┌──────▼───────────┐     ┌────────────────────┐
-                │ int_events_      │────▶│ int_session_       │
-                │ enriched         │     │ metrics            │
-                │                  │     │                    │
-                │ Events + Episode │     │ Session aggregated │
-                │ metadata         │     │ metrics            │
-                └──────────────────┘     └────────┬───────────┘
-                                                  │
-MARTS LAYER (Tables)
-┌─────────────────┐         ┌──────────────────────┐         ┌─────────────────────┐
-│   dim_users     │         │ fact_listening_      │◀────────┤   dim_episodes      │
-│                 │         │ sessions             │         │                     │
-│ ▪ user_id (PK)  │||──────○│                      │○──────||│ ▪ episode_id (PK)   │
-│   signup_date   │         │ ▪ session_key (PK)   │         │   podcast_id        │
-│   country       │         │   user_id (FK)       │         │   title             │
-│   user_cohort   │         │   episode_id (FK)    │         │   duration_category │
-└─────────────────┘         │   engagement_score   │         └─────────────────────┘
-                            │   listen_through_rate│
-                            └──────────┬───────────┘
-                                       │
-                            ┌──────────▼───────────┐
-                            │ mart_daily_user_     │
-                            │ activity             │
-                            │                      │
-                            │ Daily aggregated     │
-                            │ user behavior        │
-                            └──────────────────────┘
-
-    Legend: ||────○ = One-to-Many,  ────▶ = Data Flow,  (PK) = Primary Key, (FK) = Foreign Key
-```
+![ERD](./ERD.png)
 
 ### Dimensional Model (Star Schema)
 
