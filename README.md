@@ -209,8 +209,8 @@ end
 
 1. **Clone the repository:**
 ```bash
-git clone <repository-url>
-cd Global_analytics_engineer_test
+git clone https://github.com/dre-at8865/podcast_analytics.git
+cd podcast_analytics
 ```
 
 2. **Install Python dependencies:**
