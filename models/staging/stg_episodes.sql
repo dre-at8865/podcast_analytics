@@ -5,53 +5,33 @@
 }}
 
 with source_data as (
-    select * from {{ source('raw_podcast_data', 'episodes') }}
-),
-
-cleaned_episodes as (
-    select
+    select 
         episode_id,
         podcast_id,
-        trim(title) as title,
-        -- Parse and validate release_date
-        case 
-            when release_date is not null and release_date != ''
-            then cast(release_date as date)
-            else null
-        end as release_date,
-        -- Validate duration_seconds
-        case 
-            when duration_seconds is not null and cast(duration_seconds as integer) > 0
-            then cast(duration_seconds as integer)
-            else null
-        end as duration_seconds,
-        current_timestamp as _loaded_at
-    from source_data
+        title,
+        release_date,
+        duration_seconds
+    from read_csv('sources/episodes.csv',
+                   columns={'episode_id': 'VARCHAR', 'podcast_id': 'VARCHAR', 'title': 'VARCHAR', 'release_date': 'VARCHAR', 'duration_seconds': 'VARCHAR'},
+                   header=true)
 )
 
 select
     episode_id,
     podcast_id,
-    title,
-    release_date,
-    duration_seconds,
-    -- Add derived fields
-    round(duration_seconds / 60.0, 2) as duration_minutes,
+    trim(title) as title,
     case 
-        when duration_seconds < 900 then 'Short (< 15 min)'
-        when duration_seconds < 1800 then 'Medium (15-30 min)'
-        when duration_seconds < 3600 then 'Long (30-60 min)'
-        else 'Extended (> 60 min)'
-    end as duration_category,
-    date_diff('day', release_date, current_date) as days_since_release,
+        when release_date is not null and trim(release_date) != '' and length(trim(release_date)) >= 8
+        then trim(release_date)
+        else null
+    end as release_date_str,
     case 
-        when date_diff('day', release_date, current_date) <= 7 then 'New'
-        when date_diff('day', release_date, current_date) <= 30 then 'Recent'
-        when date_diff('day', release_date, current_date) <= 90 then 'Established'
-        else 'Archive'
-    end as episode_age_category,
-    _loaded_at
-from cleaned_episodes
+        when duration_seconds is not null and cast(duration_seconds as integer) > 0
+        then cast(duration_seconds as integer)
+        else null
+    end as duration_seconds,
+    current_timestamp as _loaded_at
+from source_data
 where 
     episode_id is not null 
     and episode_id != ''

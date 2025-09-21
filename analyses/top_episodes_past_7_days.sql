@@ -4,7 +4,7 @@
 with recent_completions as (
     select
         e.episode_id,
-        e.episode_title,
+        e.title as episode_title,
         e.podcast_id,
         count(*) as total_completions,
         count(distinct s.user_id) as unique_completers,
@@ -15,7 +15,7 @@ with recent_completions as (
     where s.completed_episode = 1
         and s.session_date >= '{{ var("analysis_date") }}'::date - interval '7 days'
         and s.session_date <= '{{ var("analysis_date") }}'::date
-    group by 1, 2, 3
+    group by e.episode_id, e.title, e.podcast_id
 )
 
 select

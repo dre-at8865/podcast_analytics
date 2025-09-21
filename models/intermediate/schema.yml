@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: int_events_enriched
+    description: Intermediate model enriching events with episode metadata
+    columns:
+      - name: user_id
+        description: User identifier
+        tests:
+          - not_null
+      - name: episode_id
+        description: Episode identifier
+        tests:
+          - not_null
+      - name: event_type
+        description: Type of event (play, pause, seek, complete)
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['play', 'pause', 'seek', 'complete']
+      - name: event_timestamp
+        description: When the event occurred
+        tests:
+          - not_null
+      - name: episode_total_duration
+        description: Total duration of the episode in seconds
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+
+  - name: int_session_metrics
+    description: Intermediate model aggregating events to session level
+    columns:
+      - name: user_id
+        description: User identifier
+        tests:
+          - not_null
+      - name: episode_id
+        description: Episode identifier
+        tests:
+          - not_null
+      - name: session_start
+        description: Start time of the session
+        tests:
+          - not_null
+      - name: session_end
+        description: End time of the session
+        tests:
+          - not_null
+      - name: session_duration_seconds
+        description: Duration of the session in seconds
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+      - name: total_listen_duration
+        description: Total time spent listening in seconds
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+      - name: session_date
+        description: Date of the session
+        tests:
+          - not_null

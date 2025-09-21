@@ -5,9 +5,9 @@ with power_users_by_day as (
     select
         session_date,
         count(distinct user_id) as power_users_count
-    from {{ ref('fact_daily_user_activity') }}
+    from {{ ref('mart_daily_user_activity') }}
     where is_power_user_day = 1  -- 3+ episodes listened
-    group by 1
+    group by session_date
 ),
 
 overall_stats as (
@@ -16,7 +16,7 @@ overall_stats as (
         count(distinct user_id) as total_unique_users,
         sum(is_power_user_day) as total_power_user_days,
         count(*) as total_user_days
-    from {{ ref('fact_daily_user_activity') }}
+    from {{ ref('mart_daily_user_activity') }}
 )
 
 select

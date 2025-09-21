@@ -10,7 +10,7 @@ with country_listen_rates as (
         sum(s.total_listen_duration) as total_listen_duration,
         sum(s.episode_total_duration) as total_episode_duration,
         avg(s.listen_through_rate) as avg_session_listen_through_rate,
-        -- Calculate overall listen-through rate
+        -- Aggregate-level calculation: sum(listen_time) / sum(episode_time)
         case 
             when sum(s.episode_total_duration) > 0
             then sum(s.total_listen_duration)::float / sum(s.episode_total_duration)::float
@@ -19,7 +19,7 @@ with country_listen_rates as (
     from {{ ref('fact_listening_sessions') }} s
     join {{ ref('dim_users') }} u
         on s.user_id = u.user_id
-    group by 1
+    group by u.country
 )
 
 select

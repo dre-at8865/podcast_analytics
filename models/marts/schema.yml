@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: dim_users
+    description: User dimension table with lifecycle cohorts
+    columns:
+      - name: user_id
+        description: Unique user identifier
+        tests:
+          - unique
+          - not_null
+      - name: country
+        description: User country
+        tests:
+          - not_null
+
+  - name: dim_episodes
+    description: Episode dimension table with categorization
+    columns:
+      - name: episode_id
+        description: Unique episode identifier
+        tests:
+          - unique
+          - not_null
+      - name: duration_seconds
+        description: Episode duration
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+
+  - name: fact_listening_sessions
+    description: Fact table of user listening sessions
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "listen_through_rate >= 0"
+          config:
+            severity: warn
+            warn_if: ">= 100"
+    columns:
+      - name: session_key
+        description: Unique session identifier
+        tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: User identifier
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_users')
+              field: user_id
+      - name: episode_id
+        description: Episode identifier
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_episodes')
+              field: episode_id

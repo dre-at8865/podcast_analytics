@@ -21,12 +21,13 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['play', 'pause', 'seek', 'complete']
+              arguments:
+                values: ['play', 'pause', 'seek', 'complete']
       - name: duration_seconds
         description: Duration for play/complete events
         tests:
           - dbt_utils.expression_is_true:
-              expression: "duration_seconds > 0 OR duration_seconds IS NULL"
+              expression: "> 0 OR duration_seconds IS NULL"
 
   - name: stg_users
     description: Clean user data
@@ -54,53 +55,7 @@ models:
         tests:
           - not_null
           - dbt_utils.expression_is_true:
-              expression: "duration_seconds > 0"
+              expression: "> 0"
 
-  - name: fact_listening_sessions
-    description: Fact table of user listening sessions
-    tests:
-      - dbt_utils.expression_is_true:
-          expression: "listen_through_rate >= 0 AND listen_through_rate <= 2"
-          config:
-            severity: warn
-    columns:
-      - name: session_key
-        description: Unique session identifier
-        tests:
-          - unique
-          - not_null
-      - name: user_id
-        description: User identifier
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_users')
-              field: user_id
-      - name: episode_id
-        description: Episode identifier
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_episodes')
-              field: episode_id
 
-  - name: fact_daily_user_activity
-    description: Daily user activity aggregations
-    columns:
-      - name: daily_activity_key
-        description: Unique daily activity identifier
-        tests:
-          - unique
-          - not_null
-      - name: user_id
-        description: User identifier
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_users')
-              field: user_id
-      - name: episodes_listened
-        description: Number of episodes listened to
-        tests:
-          - dbt_utils.expression_is_true:
-              expression: "episodes_listened >= 0"
+

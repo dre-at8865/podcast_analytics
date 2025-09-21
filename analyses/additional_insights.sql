@@ -12,21 +12,19 @@ with podcast_performance as (
     from {{ ref('fact_listening_sessions') }} s
     join {{ ref('dim_episodes') }} e
         on s.episode_id = e.episode_id
-    group by 1
+    group by e.podcast_id
 ),
 
 user_cohort_analysis as (
     select
-        u.user_cohort,
+        da.user_cohort,
         count(distinct da.user_id) as users_in_cohort,
         avg(da.episodes_listened) as avg_daily_episodes,
         avg(da.total_daily_listen_minutes) as avg_daily_listen_minutes,
         sum(da.is_power_user_day) as power_user_days,
         count(*) as total_user_days
-    from {{ ref('fact_daily_user_activity') }} da
-    join {{ ref('dim_users') }} u
-        on da.user_id = u.user_id
-    group by 1
+    from {{ ref('mart_daily_user_activity') }} da
+    group by da.user_cohort
 ),
 
 engagement_by_episode_length as (
@@ -39,7 +37,7 @@ engagement_by_episode_length as (
     from {{ ref('fact_listening_sessions') }} s
     join {{ ref('dim_episodes') }} e
         on s.episode_id = e.episode_id
-    group by 1
+    group by e.duration_category
 )
 
 -- Combine all insights

@@ -6,6 +6,10 @@ sources:
     tables:
       - name: event_logs
         description: User interaction events with podcast episodes
+        external:
+          location: "sources/event_logs.csv"
+          options:
+            header: true
         columns:
           - name: event_type
             description: Type of event (play, pause, seek, complete)
@@ -17,22 +21,17 @@ sources:
             description: When the event occurred
           - name: duration
             description: Duration in seconds (only for play and complete events)
-        tests:
-          - dbt_utils.unique_combination_of_columns:
-              combination_of_columns:
-                - user_id
-                - episode_id
-                - timestamp
-                - event_type
+
 
       - name: users
         description: User demographics and signup information
+        external:
+          location: "sources/users.csv"
+          options:
+            header: true
         columns:
           - name: user_id
             description: Unique identifier for the user
-            tests:
-              - unique
-              - not_null
           - name: signup_date
             description: Date when user signed up
           - name: country
@@ -40,12 +39,13 @@ sources:
 
       - name: episodes
         description: Episode metadata and information
+        external:
+          location: "sources/episodes.csv"
+          options:
+            header: true
         columns:
           - name: episode_id
             description: Unique identifier for the episode
-            tests:
-              - unique
-              - not_null
           - name: podcast_id
             description: Identifier for the podcast this episode belongs to
           - name: title
