@@ -4,7 +4,7 @@ This project implements a complete analytics solution for podcast streaming data
 
 ## 🏗️ Architecture Overview
 
-The solution follows a **3-layer medallion architecture** with proper dependency management:
+The solution follows a **3-layer medallion architecture**:
 
 ### **Data Flow:**
 ```
